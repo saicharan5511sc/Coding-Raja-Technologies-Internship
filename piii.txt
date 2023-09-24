@@ -1,0 +1,107 @@
+import os
+import json
+from datetime import datetime
+
+# File to store tasks
+TASKS_FILE = "tasks.json"
+
+# Initialize tasks dictionary or load existing tasks
+if os.path.exists(TASKS_FILE):
+    with open(TASKS_FILE, "r") as file:
+        tasks = json.load(file)
+else:
+    tasks = []
+
+def save_tasks():
+    with open(TASKS_FILE, "w") as file:
+        json.dump(tasks, file)
+
+def list_tasks():
+    if not tasks:
+        print(" oops!! No tasks found.")
+    else:
+        for i, task in enumerate(tasks, start=1):
+            print(f"{i}. {task['title']} - Priority: {task['priority']} - Due Date: {task['due_date']}")
+
+def add_task():
+    title = input("Enter task title: ")
+    priority = input("Enter task priority (High/Medium/Low): ").capitalize()
+    due_date_str = input("Enter due date (YYYY-MM-DD, leave empty if not set): ")
+
+    if not title:
+        print("Task title cannot be empty.")
+        return
+
+    if priority not in ["High", "Medium", "Low"]:
+        print("Invalid priority. Use High/Medium/Low.")
+        return
+
+    due_date = datetime.strptime(due_date_str, "%Y-%m-%d") if due_date_str else None
+
+    task = {
+        "title": title,
+        "priority": priority,
+        "due_date": due_date.strftime("%Y-%m-%d") if due_date else None,
+        "completed": False,
+    }
+
+    tasks.append(task)
+    save_tasks()
+    print("Task added successfully.")
+
+def remove_task():
+    list_tasks()
+    task_num = input("Enter the number of the task to remove: ")
+
+    try:
+        task_num = int(task_num)
+        if 1 <= task_num <= len(tasks):
+            removed_task = tasks.pop(task_num - 1)
+            save_tasks()
+            print(f"Removed task: {removed_task['title']}")
+        else:
+            print("Invalid task number.")
+    except ValueError:
+        print("Invalid input. Enter a valid task number.")
+
+def mark_completed():
+    list_tasks()
+    task_num = input("Enter the number of the task to mark as completed: ")
+
+    try:
+        task_num = int(task_num)
+        if 1 <= task_num <= len(tasks):
+            tasks[task_num - 1]["completed"] = True
+            save_tasks()
+            print(f"Marked task '{tasks[task_num - 1]['title']}' as completed.")
+        else:
+            print("Invalid task number.")
+    except ValueError:
+        print("Invalid input. Enter a valid task number.")
+
+def main():
+    while True:
+        print("\nTO DO List Application")
+        print("1. List Tasks")
+        print("2. Add Task")
+        print("3. Remove Task")
+        print("4. Mark Task as Completed")
+        print("5. exit")
+        choice = input("Select an option (1/2/3/4/5): ")
+
+        if choice == "1":
+            list_tasks()
+        elif choice == "2":
+            add_task()
+        elif choice == "3":
+            remove_task()
+        elif choice == "4":
+            mark_completed()
+        elif choice == "5":
+            print("see you soon!")
+            break
+        else:
+            print("Invalid choice. Please choose a valid option.")
+
+if __name__ == "__main__":
+    main()
